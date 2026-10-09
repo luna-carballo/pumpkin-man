@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>🎃 Pumpkin-Man: Halloween Harvest</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="stars-bg" id="starsBg"></div>
+  <div class="fog-layer"></div>
+
+  <main class="game-wrapper">
+    <!-- Header / HUD -->
+    <header class="game-header">
+      <div class="brand">
+        <h1 class="game-title">🎃 Pumpkin-Man</h1>
+        <span class="sub-title">L'Édition Maudite d'Halloween</span>
+      </div>
+
+      <div class="scoreboard">
+        <div class="score-card">
+          <span class="label">SCORE</span>
+          <span class="value" id="scoreDisplay">0</span>
+        </div>
+        <div class="score-card">
+          <span class="label">RECORD</span>
+          <span class="value" id="highScoreDisplay">0</span>
+        </div>
+        <div class="score-card">
+          <span class="label">NIVEAU</span>
+          <span class="value" id="levelDisplay">1</span>
+        </div>
+        <div class="score-card lives-card">
+          <span class="label">VIES</span>
+          <div class="lives-icons" id="livesDisplay">
+            <span>🎃</span><span>🎃</span><span>🎃</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Zone principale de jeu -->
+    <div class="canvas-container">
+      <canvas id="gameCanvas" width="608" height="672"></canvas>
+
+      <!-- Grand Pop-up Stylé "WHOAAAAA !" -->
+      <div class="whoa-banner" id="whoaBanner">WHOAAAAA ! 🔥</div>
+
+      <!-- Écran Overlay pour Menu / Pause / Game Over -->
+      <div class="overlay" id="gameOverlay">
+        <div class="overlay-card" id="overlayContent">
+          <h2 class="overlay-title" id="overlayTitle">🎃 HALLOWEEN HARVEST</h2>
+          <p class="overlay-subtitle" id="overlaySubtitle">Échappez aux monstres et dévorez les bonbons maudits !</p>
+          
+          <div class="items-legend">
+            <div class="legend-item">
+              <span class="legend-icon">🍬</span>
+              <span>Bonbons Maïs (+10 pts)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-icon">🎃</span>
+              <span>Lanterne Magique (+50 pts & Chasse aux spectres)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-icon">🕷️ 👻</span>
+              <span>Monstres & Araignées (Mangez-les en mode bleu !)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-icon">✨ 🐈‍⬛</span>
+              <span>Easter Eggs & Passages secrets cachés dans la crypte !</span>
+            </div>
+          </div>
+
+          <div class="overlay-actions">
+            <button class="btn btn-primary" id="startBtn">JOUER (ESPACE)</button>
+            <button class="btn btn-secondary" id="rulesBtn">📖 Guide & Secrets</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notification Flottante d'Easter Egg -->
+      <div class="easter-egg-banner" id="easterEggBanner">
+        <span class="egg-icon">✨</span>
+        <div class="egg-text">
+          <strong id="eggTitle">Secret Découvert !</strong>
+          <span id="eggDesc">Vous avez trouvé une cachette magique.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barre d'outils et contrôles -->
+    <footer class="game-controls-bar">
+      <div class="status-tracker">
+        <div class="tracker-item" title="Chat Noir mystique">
+          <span id="catStatus">🐈‍⬛ Apparition : En attente</span>
+        </div>
+        <div class="tracker-item" title="Secrets trouvés">
+          <span id="secretsStatus">🔍 Secrets : 0 / 4</span>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button class="icon-btn" id="soundToggleBtn" title="Activer / Couper le son">🔊 Son : ON</button>
+        <button class="icon-btn" id="pauseBtn" title="Pause (P)">⏸️ Pause</button>
+        <button class="icon-btn" id="restartBtn" title="Recommencer">🔄 Recommencer</button>
+      </div>
+    </footer>
+
+    <!-- D-Pad virtuel pour mobiles / tablette / souris -->
+    <div class="virtual-dpad" id="virtualDpad">
+      <button class="dpad-btn up" data-dir="up">▲</button>
+      <div class="dpad-middle">
+        <button class="dpad-btn left" data-dir="left">◀</button>
+        <div class="dpad-center">🎃</div>
+        <button class="dpad-btn right" data-dir="right">▶</button>
+      </div>
+      <button class="dpad-btn down" data-dir="down">▼</button>
+    </div>
+
+    <!-- Modal des Secrets et Règles -->
+    <div class="modal hidden" id="rulesModal">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>📜 Grimoire d'Halloween & Easter Eggs</h3>
+          <button class="modal-close" id="modalCloseBtn">✕</button>
+        </div>
+        <div class="modal-body">
+          <h4>🎃 Comment Jouer :</h4>
+          <p>Guidez <strong>Jack la Citrouille</strong> à l'aide des <kbd>Flèches</kbd> ou des touches <kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> / <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>.</p>
+          <p>Mangez toutes les graines et bonbons maïs pour purifier le cimetière et passer au niveau supérieur !</p>
+          
+          <hr>
+
+          <h4>🕷️ Les Monstres de la Crypte :</h4>
+          <ul>
+            <li><strong>👻 Le Spectre Écarlate (Ombre)</strong> : Vous traque sans relâche.</li>
+            <li><strong>🕷️ L'Araignée Tisseuse (Veuve)</strong> : Tente de vous tendre des embuscades par l'avant.</li>
+            <li><strong>🦇 La Chauve-souris Démoniaque (Vampire)</strong> : Mouvements erratiques et imprévisibles.</li>
+            <li><strong>💀 Le Crâne Furtif (Grisou)</strong> : S'approche sournoisement puis prend la fuite.</li>
+          </ul>
+
+          <hr>
+
+          <h4>🕵️ Secrets & Easter Eggs à découvrir :</h4>
+          <ol>
+            <li><strong>🐈‍⬛ Le Chat Noir "Midnight"</strong> : Il se faufile parfois dans le cimetière. Passez sur lui pour recevoir un buff de super-vitesse et des bonbons étoilés !</li>
+            <li><strong>🌀 Le Portail de Brume Oublié</strong> : Les tunnels latéraux mènent à travers la crypte !</li>
+            <li><strong>🪦 La Tombe Maudite</strong> : Passez 3 fois devant la grande stèle au bas de la carte pour invoquer l'Offrande des Ancêtres (+666 pts).</li>
+            <li><strong>🌕 Clarté de la Pleine Lune</strong> : Appuyez sur la touche <kbd>H</kbd> (comme Halloween) pour déclencher le rituel de la Lune de Sang !</li>
+          </ol>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" id="modalGotItBtn">J'ai compris !</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="audio.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
